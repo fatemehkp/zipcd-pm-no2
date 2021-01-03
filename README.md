@@ -1,4 +1,4 @@
-# zip-pm-no2
+# zipcd-pm-no2
 Zipcode lebel PM2.5 and NO2 data\
 
 1. PM2.5 provided by Jeff Yanosky
