@@ -40,3 +40,5 @@ vignettes/*.pdf
 
 # Data
 data/
+output/
+config-files/
