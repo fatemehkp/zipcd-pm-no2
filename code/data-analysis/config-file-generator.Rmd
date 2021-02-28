@@ -1,0 +1,724 @@
+---
+title: "Config File Generator"
+output: 
+---
+
+### This program:
+  (1) Generates configuration files for Java for different combinations of 
+      i. pollutant
+      ii. cause of death
+      iii. model
+
+```{r}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+```{r load packages}
+library(tidyverse)
+library(here)
+```
+
+```{r List of Pollutants}
+poll <- c("pm", "no2")
+poll.resid <- c("PM_NO2", "NO2_PM")
+```
+
+```{r List of Causes of Death}
+cuz <- c("allcuz","nacc","acc",
+         "cvd","ihd","chf","cbv",
+         "resp","copd","pneu","uri","ards",
+         "canc","lungc",
+         "seps",
+         "VaD","AD","NeD","UsD",
+         "diabt1", "diabt2", "diab",
+         "kidn")
+
+cuz.rc <- c(
+         "cvd","ihd","chf","cbv",
+         "resp","copd","pneu","uri","ards",
+         "seps",
+         "VaD","AD","NeD","UsD",
+         "diabt1", "diabt2", "diab",
+         "kidn")
+```
+
+```{r Config file - Base Model}
+config.base <- c("# data path
+data_path=/scratch/fatemehkp/projects/Zipcode\ PM\ NO2/data/analysis/ndi-exposure-zipcd-dataset.csv
+
+# loader settings
+# separated symbol for the given data
+sep=,
+# the predictors are included in the model
+predictors=exposure_1yr
+# stratas
+stratas=StrID, ZIP_CODE
+# death
+death=no_death_outcome
+# life
+life=no_enrollee
+
+# optimizer settings
+# whether considering ties for death, default false
+isTies=false
+# if given multiple cores, set isParallelism as true
+isParallelism=true
+# whether penalizing the weight
+l2=false
+# if penalizing the weight, set the strength, otherwise it is useless.
+l2Strength=1
+
+# the application class name
+survival.class=CoxPH
+")
+```
+
+```{r Config file - SES Adj. Model}
+config.ses <- c("# data path
+data_path=/scratch/fatemehkp/projects/Zipcode\ PM\ NO2/data/analysis/ndi-exposure-zipcd-dataset.csv
+
+# loader settings
+# separated symbol for the given data
+sep=,
+# the predictors are included in the model
+predictors=exposure_1yr, ses_zip, ses_stt
+# stratas
+stratas=StrID, ZIP_CODE
+# death
+death=no_death_outcome
+# life
+life=no_enrollee
+
+# optimizer settings
+# whether considering ties for death, default false
+isTies=false
+# if given multiple cores, set isParallelism as true
+isParallelism=true
+# whether penalizing the weight
+l2=false
+# if penalizing the weight, set the strength, otherwise it is useless.
+l2Strength=1
+
+# the application class name
+survival.class=CoxPH
+")
+```
+
+```{r Config file - Residual Model}
+config.resid <- c("# data path
+data_path=/scratch/fatemehkp/projects/Zipcode\ PM\ NO2/data/analysis/ndi-no2-zipcd-dataset.csv
+
+# loader settings
+# separated symbol for the given data
+sep=,
+# the predictors are included in the model
+predictors=exposure, ses_zip, ses_stt
+# stratas
+stratas=StrID, ZIP_CODE
+# death
+death=no_death_outcome
+# life
+life=no_enrollee
+
+# optimizer settings
+# whether considering ties for death, default false
+isTies=false
+# if given multiple cores, set isParallelism as true
+isParallelism=true
+# whether penalizing the weight
+l2=false
+# if penalizing the weight, set the strength, otherwise it is useless.
+l2Strength=1
+
+# the application class name
+survival.class=CoxPH
+")
+```
+
+```{r Config file - EM Models}
+config.em <- c("# data path
+data_path=/scratch/fatemehkp/projects/Zipcode\ PM\ NO2/data/analysis/ndi-exposure-zipcd-dataset.csv
+
+# loader settings
+# separated symbol for the given data
+sep=,
+# the predictors are included in the model
+predictors=exposure_1yr, subg, exposuresubg, ses_zip, ses_stt
+# stratas
+stratas=StrID, ZIP_CODE
+# death
+death=no_death_outcome
+# life
+life=no_enrollee
+
+# optimizer settings
+# whether considering ties for death, default false
+isTies=false
+# if given multiple cores, set isParallelism as true
+isParallelism=true
+# whether penalizing the weight
+l2=false
+# if penalizing the weight, set the strength, otherwise it is useless.
+l2Strength=1
+
+# the application class name
+survival.class=CoxPH
+")
+```
+
+
+```{r Config file - BRFSS Models}
+config.brfss <- c("# data path
+data_path=/scratch/fatemehkp/projects/Zipcode\ PM\ NO2/data/analysis/ndi-exposure-zipcd-dataset.csv
+
+# loader settings
+# separated symbol for the given data
+sep=,
+# the predictors are included in the model
+predictors=exposure_1yr, X_bmi_Mean, X_raceg_Prop, X_rfsmok_Prop, X_diabetes_Prop, X_asthma_Prop, X_rfdrhv_Prop, ses_zip, ses_stt
+# stratas
+stratas=StrID, ZIP_CODE
+# death
+death=no_death_outcome
+# life
+life=no_enrollee
+
+# optimizer settings
+# whether considering ties for death, default false
+isTies=false
+# if given multiple cores, set isParallelism as true
+isParallelism=true
+# whether penalizing the weight
+l2=false
+# if penalizing the weight, set the strength, otherwise it is useless.
+l2Strength=1
+
+# the application class name
+survival.class=CoxPH
+")
+```
+
+```{r base model}
+dataname <- ""
+expo <- poll
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.base, file=f)
+    x <- readLines(f)
+    y <- gsub("-dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], z)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','base', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+}
+```
+
+```{r ses adj. model}
+dataname <- ""
+expo <- poll
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.ses, file=f)
+    x <- readLines(f)
+    y <- gsub("-dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], z)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','ses', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+}
+```
+
+```{r ses adj. model}
+dataname <- ""
+expo <- poll.resid
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.resid, file=f)
+    x <- readLines(f)
+    y <- gsub("-dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], z)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','resid', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+}
+```
+
+```{r ses adj. model residuals}
+
+```
+
+
+```{r ses adj. model - race Asian}
+dataname <- "race"
+expo <- poll
+subg <- "raceA"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','raceA', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+```{r ses adj. model - race Black}
+dataname <- "race"
+expo <- poll
+subg <- "raceB"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','raceB', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+```{r ses adj. model - race Hispanic}
+dataname <- "race"
+expo <- poll
+subg <- "raceH"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','raceH', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+```{r ses adj. model - race Native American}
+dataname <- "race"
+expo <- poll
+subg <- "raceN"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','raceN', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+```{r ses adj. model - race Others}
+dataname <- "race"
+expo <- poll
+subg <- "raceO"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','raceO', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+```{r ses adj. model - race White}
+dataname <- "race"
+expo <- poll
+subg <- "raceW"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','raceW', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+```{r ses adj. model for age LE75}
+dataname <- "asr"
+expo <- poll
+subg <- "agel"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','ageLE75', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+```{r ses adj. model for age M75}
+dataname <- "asr"
+expo <- poll
+subg <- "agem"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','ageM75', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+
+```{r ses adj. model - Urban}
+dataname <- "urban"
+expo <- poll
+subg <- "urb"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','urban', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+```{r ses adj. model - Non Urban}
+dataname <- "urban"
+expo <- poll
+subg <- "nonurb"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','nonurban', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+
+```{r ses adj. model - Urban ses Low}
+dataname <- "urban-sescat"
+expo <- poll
+subg <- "sesL"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','urban-sesL', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+
+```{r ses adj. model - Urban ses Middle}
+dataname <- "urban-sescat"
+expo <- poll
+subg <- "sesM"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','urban-sesM', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+
+```{r ses adj. model - Urban ses High}
+dataname <- "urban-sescat"
+expo <- poll
+subg <- "sesH"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','urban-sesH', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+
+```{r ses adj. model - Female}
+dataname <- "asr"
+expo <- poll
+subg <- "sexF"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','sexF', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+```{r ses adj. model - Male}
+dataname <- "asr"
+expo <- poll
+subg <- "sexM"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','sexM', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+
+```{r ses adj. model - sites with BRFSS data}
+dataname <- "brfss"
+expo <- poll
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.ses, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], z)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','brfss0', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+}
+```
+
+```{r ses adj. model - adj. BRFSS data}
+dataname <- "brfss"
+expo <- poll
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.brfss, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], z)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','brfss', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+}
+```
+
+```{r ses adj. model - ICD/RC}
+dataname <- "rc"
+expo <- poll
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.ses, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    for (j in seq(1,length(cuz.rc),1)){
+      w <- gsub("outcome", cuz.rc[j], z)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz.rc)*(i-1)
+      writeLines(w, here('config-files','ses-rc', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+}
+```
+
+```{r ses adj. model - ICD/RC}
+dataname <- "rc8"
+expo <- poll
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.ses, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    for (j in seq(1,length(cuz.rc),1)){
+      w <- gsub("outcome", cuz.rc[j], z)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz.rc)*(i-1)
+      writeLines(w, here('config-files','ses-rc8', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+}
+```

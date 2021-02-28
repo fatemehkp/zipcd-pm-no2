@@ -1,0 +1,65 @@
+---
+title: "Death Number Distribution"
+author: "Fatemeh Kazemi"
+date: "2/28/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load packages}
+library(tidyverse)
+library(here)
+```
+
+```{r}
+dirUSSpatial <- 'C:\\Users\\fkazem01\\Box\\Projects\\USA Spatial\\data\\processed\\'
+load(paste0(dirUSSpatial,'state-region.RDa'))
+```
+
+```{r}
+dt.dead.enrollee <- read.csv(
+  here('data', 'processed','enrollee_pm_dead.csv'))
+
+save(dt.dead.enrollee, file = here('data','processed','dead-enrollee.RDa'))
+
+dt.dead.enrollee <- dt.state.region %>% 
+  transmute(state = State,
+            region = Region.IV) %>% 
+  right_join(dt.dead.enrollee)
+```
+
+```{r}
+names(dt.dead.enrollee)
+
+dt.dead.enrollee %>% 
+  summarise(across(allcuz:kidn, sum)) %>% 
+  mutate(group = "total")
+
+dt.dead.enrollee %>% 
+  group_by(ENROLLEE_AGE > 75) %>% 
+  summarise(across(allcuz:kidn, sum)) %>% 
+  rename(group = 'ENROLLEE_AGE > 75')
+
+dt.dead.enrollee %>% 
+  group_by(sex) %>% 
+  summarise(across(allcuz:kidn, sum))
+
+dt.dead.enrollee %>% 
+  group_by(race) %>% 
+  summarise(across(allcuz:kidn, sum))
+
+dt.dead.enrollee %>% 
+  group_by(urban) %>% 
+  summarise(across(allcuz:kidn, sum))
+
+dt.dead.enrollee %>% 
+  group_by(ses_tertile) %>% 
+  summarise(across(allcuz:kidn, sum))
+
+dt.dead.enrollee %>% 
+  group_by(region) %>% 
+  summarise(across(allcuz:kidn, sum))
+```
