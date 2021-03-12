@@ -17,9 +17,10 @@ library(here)
 ```{r}
 dirUSSpatial <- 'C:\\Users\\fkazem01\\Box\\Projects\\USA Spatial\\data\\processed\\'
 load(paste0(dirUSSpatial,'state-region.RDa'))
+load(here('data','processed','dead-enrollee.RDa'))
 ```
 
-```{r}
+```{r data}
 dt.dead.enrollee <- read.csv(
   here('data', 'processed','enrollee_pm_dead.csv'))
 
@@ -32,34 +33,104 @@ dt.dead.enrollee <- dt.state.region %>%
 ```
 
 ```{r}
-names(dt.dead.enrollee)
-
 dt.dead.enrollee %>% 
   summarise(across(allcuz:kidn, sum)) %>% 
-  mutate(group = "total")
+  mutate(Subgroup = "Total", 
+         Value = "Total") %>% 
+  select(Subgroup, Value, everything())
+```
 
+
+```{r}
 dt.dead.enrollee %>% 
   group_by(ENROLLEE_AGE > 75) %>% 
   summarise(across(allcuz:kidn, sum)) %>% 
-  rename(group = 'ENROLLEE_AGE > 75')
+  mutate(Subgroup = "Age", 
+         Value = ifelse(`ENROLLEE_AGE > 75` == "FALSE", "LE75", "M75")) %>% 
+  select(Subgroup, Value, everything(), -`ENROLLEE_AGE > 75`)
+```
 
+
+```{r}
 dt.dead.enrollee %>% 
   group_by(sex) %>% 
-  summarise(across(allcuz:kidn, sum))
+  summarise(across(allcuz:kidn, sum)) %>% 
+  mutate(Subgroup = "Sex", 
+         Value = sex) %>% 
+  select(Subgroup, Value, everything(), -sex)
+```
 
+
+```{r}
 dt.dead.enrollee %>% 
   group_by(race) %>% 
-  summarise(across(allcuz:kidn, sum))
+  summarise(across(allcuz:kidn, sum)) %>% 
+  mutate(Subgroup = "Race", 
+         Value = race) %>% 
+  select(Subgroup, Value, everything(), -race)
+```
 
+
+```{r}
 dt.dead.enrollee %>% 
   group_by(urban) %>% 
-  summarise(across(allcuz:kidn, sum))
+  summarise(across(allcuz:kidn, sum)) %>% 
+  mutate(Subgroup = "Urbanicity", 
+         Value = ifelse(urban == 1, "urban", "non-urban")) %>% 
+  select(Subgroup, Value, everything(), -urban)
+```
 
+
+```{r}
 dt.dead.enrollee %>% 
   group_by(ses_tertile) %>% 
-  summarise(across(allcuz:kidn, sum))
+  summarise(across(allcuz:kidn, sum)) %>% 
+  mutate(Subgroup = "SES Category", 
+         Value = ifelse(ses_tertile == 0, "Low",
+                        ifelse(ses_tertile == 1, "Middle", "High"))) %>% 
+  select(Subgroup, Value, everything(), -ses_tertile)
+```
 
+
+```{r}
 dt.dead.enrollee %>% 
   group_by(region) %>% 
-  summarise(across(allcuz:kidn, sum))
+  summarise(across(allcuz:kidn, sum)) %>% 
+  mutate(Subgroup = "Region", 
+         Value = ifelse(region == 1, "W",
+                        ifelse(region == 2, "MW", 
+                               ifelse(region == 3, "S", "NE")))) %>% 
+  select(Subgroup, Value, everything(), -region)
 ```
+
+```{r}
+dt.dead.enrollee %>% 
+  filter(!is.na(X_bmi_Mean)) %>% 
+  summarise(across(allcuz:kidn, sum)) %>% 
+  mutate(Subgroup = "BRFSS", 
+         Value = "BRFSS") %>% 
+  select(Subgroup, Value, everything())
+```
+
+```{r}
+dt.dead.enrollee %>% 
+  filter(!is.na(no2_1yr)) %>% 
+  summarise(across(allcuz:kidn, sum)) %>% 
+  mutate(group = "total")
+```
+
+```{r}
+dt.dead.enrollee %>% 
+  summarise(across(cvd_rc:kidn_rc, sum)) %>% 
+  mutate(group = "total")
+```
+
+
+
+
+
+
+
+
+
+

@@ -722,3 +722,71 @@ for (i in seq(1,length(expo),1)){
   file.remove(f)
 }
 ```
+
+```{r ses adj. model pm < 8}
+dataname <- "-pm8"
+expo <- poll
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.ses, file=f)
+    x <- readLines(f)
+    y <- gsub("-dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], z)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','pm8', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+}
+```
+
+
+```{r ses adj. model pm < 10}
+dataname <- "-pm10"
+expo <- poll
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.ses, file=f)
+    x <- readLines(f)
+    y <- gsub("-dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], z)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','pm10', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+}
+```
+
+
+```{r ses adj. model pm < 12}
+dataname <- "-pm12"
+expo <- poll
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.ses, file=f)
+    x <- readLines(f)
+    y <- gsub("-dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], z)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','pm12', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+}
+```
