@@ -9,10 +9,14 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```{r load packages}
 library(tidyverse)
 library(here)
+library(readxl)
 ```
 
 ```{r Load data}
-
+load(here('output','analysis','out-results.RDa'))
+load(here('output','analysis','death-summary.RDa'))
+enrollee.summary <- as.data.frame(read_excel(here('output', 'table', 'CMS Summary.xlsx'), 
+                                    sheet = "Enrollee"))
 ```
 
 ```{r - Predictor to Index}
@@ -66,13 +70,13 @@ Outcome.to.Cause <- tribble(
 
 
 ```{r Output Base}
-out.base <- read.csv(here('output','analysis','base.csv')) %>% 
+out.base <- read.csv(here('output','analysis','csv','base.csv')) %>% 
   merge(Para.to.Index) %>% 
   merge(Outcome.to.Cause) %>% 
   mutate(HR = round(exp(Coef * 10),3),
          HR.L = round(exp((Coef-1.96*std) * 10),3),
          HR.U = round(exp((Coef+1.96*std) * 10),3),
-         Subgroup = "Base", 
+         Subgroup = "Total", 
          Value = "Base") %>% 
   arrange(Config, Value) %>% 
   select(Index, Cause, Subgroup, Value, HR, HR.L, HR.U)
@@ -80,35 +84,36 @@ out.base <- read.csv(here('output','analysis','base.csv')) %>%
 
 
 ```{r Output SES-Adj}
-out.ses <- read.csv(here('output','analysis','ses.csv')) %>% 
+out.ses <- read.csv(here('output','analysis','csv','ses.csv')) %>% 
   merge(Para.to.Index) %>% 
   merge(Outcome.to.Cause) %>% 
   mutate(HR = round(exp(Coef * 10),3),
          HR.L = round(exp((Coef-1.96*std) * 10),3),
          HR.U = round(exp((Coef+1.96*std) * 10),3),
-         Subgroup = "SES", 
+         Subgroup = "Total", 
          Value = "SES") %>% 
   arrange(Config, Value) %>% 
   select(Index, Cause, Subgroup, Value, HR, HR.L, HR.U)
 ```
 
 ```{r Output Residuals}
-out.resid <- read.csv(here('output','analysis','resid.csv')) %>% 
+out.resid <- read.csv(here('output','analysis','csv','resid.csv')) %>% 
   merge(Para.to.Index.resid) %>% 
   merge(Outcome.to.Cause) %>% 
   mutate(HR = round(exp(Coef * 10),3),
          HR.L = round(exp((Coef-1.96*std) * 10),3),
          HR.U = round(exp((Coef+1.96*std) * 10),3),
-         Subgroup = "Residual", 
+         Subgroup = "Total", 
          Value = "Residual") %>% 
   arrange(Config, Value) %>% 
-  select(Index, Cause, Subgroup, Value, HR, HR.L, HR.U)
+  select(Index, Cause, Subgroup, Value, HR, HR.L, HR.U) %>% 
+  mutate(Index = gsub("_.*", "", Index))
 ```
 
 ```{r Output Age}
 out.age = data.frame()
 for (i in c("LE75", "M75")){
-  dt <- read.csv(here('output','analysis',paste('age',i,'.csv', sep= ""))) %>% 
+  dt <- read.csv(here('output','analysis','csv',paste('age',i,'.csv', sep= ""))) %>% 
     mutate(Value = i)
   out.age  <-  rbind(out.age, dt)
 }
@@ -127,7 +132,7 @@ out.age <- out.age %>%
 ```{r Output Sex}
 out.sex = data.frame()
 for (i in c("F", "M")){
-  dt <- read.csv(here('output','analysis',paste('sex',i,'.csv', sep= ""))) %>% 
+  dt <- read.csv(here('output','analysis','csv',paste('sex',i,'.csv', sep= ""))) %>% 
     mutate(Value = i)
   out.sex  <-  rbind(out.sex, dt)
 }
@@ -146,7 +151,7 @@ out.sex <- out.sex %>%
 ```{r Output Race}
 out.race = data.frame()
 for (i in c("A", "B", "H", "N", "W", "O")){
-  dt <- read.csv(here('output','analysis',paste('race',i,'.csv', sep= ""))) %>% 
+  dt <- read.csv(here('output','analysis','csv',paste('race',i,'.csv', sep= ""))) %>% 
     mutate(Value = i)
   out.race  <-  rbind(out.race, dt)
 }
@@ -165,7 +170,7 @@ out.race <- out.race %>%
 ```{r Output Urbanicity}
 out.urbanicity = data.frame()
 for (i in c("urban", "nonurban")){
-  dt <- read.csv(here('output','analysis',paste(i,'.csv', sep= ""))) %>% 
+  dt <- read.csv(here('output','analysis','csv',paste(i,'.csv', sep= ""))) %>% 
     mutate(Value = i)
   out.urbanicity  <-  rbind(out.urbanicity, dt)
 }
@@ -184,7 +189,7 @@ out.urbanicity <- out.urbanicity %>%
 ```{r Output SES urban area}
 out.urbanses = data.frame()
 for (i in c("L", "M", "H")){
-  dt <- read.csv(here('output','analysis',paste('urbanses',i,'.csv', sep= ""))) %>% 
+  dt <- read.csv(here('output','analysis','csv',paste('urbanses',i,'.csv', sep= ""))) %>% 
     mutate(Value = i)
   out.urbanses  <-  rbind(out.urbanses, dt)
 }
@@ -203,7 +208,7 @@ out.urbanses <- out.urbanses %>%
 ```{r Output BRFSS}
 out.brfss = data.frame()
 for (i in c("brfss0", "brfss")){
-  dt <- read.csv(here('output','analysis',paste(i,'.csv', sep= ""))) %>% 
+  dt <- read.csv(here('output','analysis','csv',paste(i,'.csv', sep= ""))) %>% 
     mutate(Value = i)
   out.brfss  <-  rbind(out.brfss, dt)
 }
@@ -221,27 +226,27 @@ out.brfss <- out.brfss %>%
   select(Index, Cause, Subgroup, Value, HR, HR.L, HR.U) 
 ```
 
-```{r Output SES-Adj - RC 4}
-out.rc4 <- read.csv(here('output','analysis','sesrc4.csv')) %>% 
+```{r Output SES-Adj - RC4}
+out.rc4 <- read.csv(here('output','analysis','csv','sesrc4.csv')) %>% 
   merge(Para.to.Index) %>% 
   merge(Outcome.to.Cause) %>% 
   mutate(HR = round(exp(Coef * 10),3),
          HR.L = round(exp((Coef-1.96*std) * 10),3),
          HR.U = round(exp((Coef+1.96*std) * 10),3),
-         Subgroup = "RC4", 
+         Subgroup = "Total", 
          Value = "RC4") %>% 
   arrange(Config, Value) %>% 
   select(Index, Cause, Subgroup, Value, HR, HR.L, HR.U)
 ```
 
 ```{r Output SES-Adj - RC 8}
-out.rc8 <- read.csv(here('output','analysis','sesrc8.csv')) %>% 
+out.rc8 <- read.csv(here('output','analysis','csv','sesrc8.csv')) %>% 
   merge(Para.to.Index) %>% 
   merge(Outcome.to.Cause) %>% 
   mutate(HR = round(exp(Coef * 10),3),
          HR.L = round(exp((Coef-1.96*std) * 10),3),
          HR.U = round(exp((Coef+1.96*std) * 10),3),
-         Subgroup = "RC8", 
+         Subgroup = "Total", 
          Value = "RC8") %>% 
   arrange(Config, Value) %>% 
   select(Index, Cause, Subgroup, Value, HR, HR.L, HR.U)
@@ -260,11 +265,23 @@ out.results <- out.base %>%
   add_row(out.rc4) %>% 
   add_row(out.rc8)
 
+out.results <- out.results %>% 
+  full_join(enrollee.summary) %>% 
+  full_join(death.summary)
+  
+
 save(out.results, file = here('output','analysis','out-results.RDa'))
 write.csv(out.results, 
           file = here('output','analysis','out-results.csv'))
 ```
 
+```{r}
+sepsis <- out.results %>% 
+  filter(Cause == "Sepsis" & !is.na(Enrollee))
+
+write.csv(sepsis, 
+          file = here('output','analysis','sepsis.csv'))
+```
 
 https://cran.r-project.org/web/packages/forestplot/vignettes/forestplot.html
 https://cran.r-project.org/web/packages/metaviz/vignettes/metaviz.html
