@@ -11,6 +11,7 @@ library(tidyverse)
 library(here)
 library(readxl)
 library(forestplot)
+library(scales)
 ```
 ```{r}
 sepsis.pm25 <- as.data.frame(read_excel(here('output', 'analysis', 'sepsis.xlsx'), 
@@ -20,16 +21,16 @@ sepsis.no2 <- as.data.frame(read_excel(here('output', 'analysis', 'sepsis.xlsx')
                                     sheet = "NO2"))
 ```
 
-```{r}
+```{r - Sepsis - PM2.5}
 ## Labels defining subgroups are a little indented!
-subgps <- c(4,5,8,9,12,13,14,15,17,18,19,22,23,24,27,28)
+subgps <- c(2,3,6,7,10,11,14,15,16,17,20,21,24,25,26,29,30)
 sepsis.pm25$Variable[subgps] <- paste("  ",sepsis.pm25$Variable[subgps]) 
 
 ## Combine the count and percent column
-np <- ifelse(!is.na(sepsis.pm25$Enrollee), paste(sepsis.pm25$Enrollee, "(",
+np <- ifelse(!is.na(sepsis.pm25$Enrollee), paste(comma(sepsis.pm25$Enrollee), " (",
                                                  sepsis.pm25$`Enrollee Percent`,
                                                  ")", sep=""), NA)
-yp <- ifelse(!is.na(sepsis.pm25$Death), paste(sepsis.pm25$Death, " (", 
+yp <- ifelse(!is.na(sepsis.pm25$Death), paste(comma(sepsis.pm25$Death), " (", 
                                               sepsis.pm25$`Death Percent`, 
                                               ")", sep=""), NA)
 hr <- ifelse(!is.na(sepsis.pm25$`Point Estimate`), 
@@ -38,35 +39,49 @@ hr <- ifelse(!is.na(sepsis.pm25$`Point Estimate`),
                    sprintf("%.3f", sepsis.pm25$High), ")", sep=""), NA)
 
 ## The rest of the columns in the table. 
-tabletext <- cbind(c("Subgroup","\n",sepsis.pm25$Variable),
+tabletext.pm <- cbind(c("Subgroup","\n",sepsis.pm25$Variable),
                    c("Enrollee (%)","\n",np),
                    c("Sepsis Death (%)","\n",yp),
                    c("Hazard Ratio (95% CI)","\n",hr))
 
-jpeg(here('output','plot','sepsis-pm25.jpeg'), width = 12, height = 10, units = 'in', res = 300)
-forestplot(labeltext = tabletext, graph.pos = 4,
+jpeg(here('output','plot','sepsis-pm25.jpeg'), width = 12, height = 12, 
+     units = 'in', res = 300)
+forestplot(labeltext = tabletext.pm, 
            mean = c(NA, NA, sepsis.pm25$`Point Estimate`), 
-           lower = c(NA, NA, sepsis.pm25$Low), upper = c(NA, NA, sepsis.pm25$High),
-           title = expression(PM[2.5]),
+           lower = c(NA, NA, sepsis.pm25$Low), 
+           upper = c(NA, NA, sepsis.pm25$High),
+           align = c("l", "l", "l", "l"),
+           is.summary = c(T, F, T, F, F, F, T, F, F, F, T, F, F, F, T, F, F, F, F, F, 
+                          T, F, F, F, T, F, F, F, F, T, F, F, F),
+           graph.pos = 4,
+           hrzl_lines = gpar(col = "#444444"),
+           zero = 1, 
+           colgap = unit(5,"mm"),
+           col = fpColors(box = "darkblue", 
+                          lines = "darkblue", 
+                          zero = "red"),
            txt_gp = fpTxtGp(label = gpar(cex = 1.2),
                           ticks = gpar(cex = 1.2),
                           title = gpar(cex = 2, fontface = 2)),
-           col = fpColors(box = "black", lines = "black", zero = "gray50"),
-           zero = 1, cex = 2, lineheight = "auto", boxsize = 0.2, colgap = unit(2,"mm"),
-           lwd.ci = 2, ci.vertices = T, ci.vertices.height = 0.2) 
+           grid = T,
+           lwd.ci = 2, 
+           ci.vertices = T, 
+           ci.vertices.height = 0.15,
+           boxsize = 0.2, 
+           title = expression(PM[2.5])) 
 dev.off()
 ```
 
-```{r}
+```{r - Sepsis NO2}
 ## Labels defining subgroups are a little indented!
-subgps <- c(4,5,8,9,12,13,14,15,17,18,19,22,23,24,27,28)
+subgps <- c(2,3,6,7,10,11,14,15,16,17,20,21,24,25,26,29,30)
 sepsis.no2$Variable[subgps] <- paste("  ",sepsis.no2$Variable[subgps]) 
 
 ## Combine the count and percent column
-np <- ifelse(!is.na(sepsis.no2$Enrollee), paste(sepsis.no2$Enrollee, "(",
+np <- ifelse(!is.na(sepsis.no2$Enrollee), paste(comma(sepsis.no2$Enrollee), " (",
                                                  sepsis.no2$`Enrollee Percent`,
                                                  ")", sep=""), NA)
-yp <- ifelse(!is.na(sepsis.no2$Death), paste(sepsis.no2$Death, " (", 
+yp <- ifelse(!is.na(sepsis.no2$Death), paste(comma(sepsis.no2$Death), " (", 
                                               sepsis.no2$`Death Percent`, 
                                               ")", sep=""), NA)
 hr <- ifelse(!is.na(sepsis.no2$`Point Estimate`), 
@@ -75,21 +90,37 @@ hr <- ifelse(!is.na(sepsis.no2$`Point Estimate`),
                    sprintf("%.3f", sepsis.no2$High), ")", sep=""), NA)
 
 ## The rest of the columns in the table. 
-tabletext <- cbind(c("Subgroup","\n",sepsis.no2$Variable),
+tabletext.no2 <- cbind(c("Subgroup","\n",sepsis.no2$Variable),
                    c("Enrollee (%)","\n",np),
                    c("Sepsis Death (%)","\n",yp),
                    c("Hazard Ratio (95% CI)","\n",hr))
 
-jpeg(here('output','plot','sepsis-no2.jpeg'), width = 12, height = 10, units = 'in', res = 300)
-forestplot(labeltext = tabletext, graph.pos = 4,
+jpeg(here('output','plot','sepsis-no2.jpeg'), width = 12, height = 12, 
+     units = 'in', res = 300)
+forestplot(labeltext = tabletext.no2, 
            mean = c(NA, NA, sepsis.no2$`Point Estimate`), 
-           lower = c(NA, NA, sepsis.no2$Low), upper = c(NA, NA, sepsis.no2$High),
-           title = expression(NO[2]),
+           lower = c(NA, NA, sepsis.no2$Low), 
+           upper = c(NA, NA, sepsis.no2$High),
+           align = c("l", "l", "l", "l"),
+           is.summary = c(T, F, T, F, F, F, T, F, F, F, T, F, F, F, T, F, F, F, F, F, 
+                          T, F, F, F, T, F, F, F, F, T, F, F, F),
+           graph.pos = 4,
+           hrzl_lines = gpar(col = "#444444"),
+           zero = 1, 
+           colgap = unit(5,"mm"),
+           col = fpColors(box = "darkblue",
+                          line = "darkblue", 
+                          zero = "red"),
            txt_gp = fpTxtGp(label = gpar(cex = 1.2),
-                          ticks = gpar(cex = 1.2),
-                          title = gpar(cex = 2, fontface = 2)),
-           col = fpColors(box = "black", lines = "black", zero = "gray50"),
-           zero = 1, cex = 2, lineheight = "auto", boxsize = 0.2, colgap = unit(2,"mm"),
-           lwd.ci = 2, ci.vertices = T, ci.vertices.height = 0.2) 
+                            ticks = gpar(cex = 1.2),
+                            title = gpar(cex = 2, fontface = 2)),
+           grid = T,
+           lwd.ci = 2, 
+           ci.vertices = T, 
+           ci.vertices.height = 0.15,
+           boxsize = 0.2, 
+           title = expression(NO[2])) 
 dev.off()
 ```
+
+
