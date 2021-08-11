@@ -198,6 +198,37 @@ survival.class=CoxPH
 ")
 ```
 
+```{r Config file - two-poll Model}
+config.two <- c("# data path
+data_path=/scratch/fatemehkp/projects/Zipcode\ PM\ NO2/data/analysis/ndi-exposure-zipcd-no2.csv
+
+# loader settings
+# separated symbol for the given data
+sep=,
+# the predictors are included in the model
+predictors=pm_1yr, no2_1yr, ses_zip, ses_stt
+# stratas
+stratas=StrID, ZIP_CODE
+# death
+death=no_death_outcome
+# life
+life=no_enrollee
+
+# optimizer settings
+# whether considering ties for death, default false
+isTies=false
+# if given multiple cores, set isParallelism as true
+isParallelism=true
+# whether penalizing the weight
+l2=false
+# if penalizing the weight, set the strength, otherwise it is useless.
+l2Strength=1
+
+# the application class name
+survival.class=CoxPH
+")
+```
+
 ```{r base model}
 dataname <- ""
 expo <- poll
@@ -242,7 +273,7 @@ for (i in seq(1,length(expo),1)){
 }
 ```
 
-```{r ses adj. model}
+```{r ses adj. model residuals}
 dataname <- ""
 expo <- poll.resid
 
@@ -262,10 +293,6 @@ for (i in seq(1,length(expo),1)){
   }
   file.remove(f)
 }
-```
-
-```{r ses adj. model residuals}
-
 ```
 
 
@@ -673,6 +700,48 @@ for (i in seq(1,length(expo),1)){
       cat(w, file=f, sep="\n")
       k=j+length(cuz)*(i-1)
       writeLines(w, here('config-files','brfss', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+}
+```
+
+```{r ses adj. model}
+dataname <- ""
+expo <- poll
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.ses, file=f)
+    x <- readLines(f)
+    y <- gsub("-dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], z)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','ses', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+}
+```
+
+```{r ses adj. model- two-poll}
+dataname <- ""
+expo <- poll
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.two, file=f)
+    x <- readLines(f)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], x)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','two-poll', paste(k,'.txt', sep = "")))
     }
   }
   file.remove(f)

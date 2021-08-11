@@ -281,6 +281,18 @@ sepsis <- out.results %>%
 
 write.csv(sepsis, 
           file = here('output','analysis','sepsis.csv'))
+	
+type1Diab <- out.results %>% 
+  filter(Cause == "Type1 Diabetes" & !is.na(Enrollee))
+
+write.csv(type1Diab, 
+          file = here('output','analysis','type1Diabetes.csv'))
+
+type2Diab <- out.results %>% 
+  filter(Cause == "Type2 Diabetes" & !is.na(Enrollee))
+
+write.csv(type2Diab, 
+          file = here('output','analysis','type2Diabetes.csv'))
 ```
 
 https://cran.r-project.org/web/packages/forestplot/vignettes/forestplot.html
