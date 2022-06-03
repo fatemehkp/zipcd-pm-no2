@@ -904,3 +904,291 @@ for (i in seq(1,length(expo),1)){
   file.remove(f)
 }
 ```
+
+```{r ses adj. model - race Asian - urban}
+dataname <- "race-urban"
+expo <- poll
+subg <- "raceA"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','raceAurb', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+```{r ses adj. model - race Black - urban}
+dataname <- "race-urban"
+expo <- poll
+subg <- "raceB"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','raceBurb', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+```{r ses adj. model - race Hispanic - urban}
+dataname <- "race-urban"
+expo <- poll
+subg <- "raceH"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','raceHurb', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+```{r ses adj. model - race Native American - urban}
+dataname <- "race-urban"
+expo <- poll
+subg <- "raceN"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','raceNurb', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+```{r ses adj. model - race Others - urban}
+dataname <- "race-urban"
+expo <- poll
+subg <- "raceO"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','raceOurb', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+```{r ses adj. model - race White - urban}
+dataname <- "race-urban"
+expo <- poll
+subg <- "raceW"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','raceWurb', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+```{r ses adj. model - race Asian - nonurban}
+dataname <- "race-nonurban"
+expo <- poll
+subg <- "raceA"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','raceAnonurb', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+```{r ses adj. model - race Black - nonurban}
+dataname <- "race-nonurban"
+expo <- poll
+subg <- "raceB"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','raceBnonurb', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+```{r ses adj. model - race Hispanic - nonurban}
+dataname <- "race-nonurban"
+expo <- poll
+subg <- "raceH"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','raceHnonurb', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+```{r ses adj. model - race Native American-nonurban}
+dataname <- "race-nonurban"
+expo <- poll
+subg <- "raceN"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','raceNnonurb', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+```{r ses adj. model - race Others-nonurban}
+dataname <- "race-nonurban"
+expo <- poll
+subg <- "raceO"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','raceOnonurb', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
+
+```{r ses adj. model - race White-nonurban}
+dataname <- "race-nonurban"
+expo <- poll
+subg <- "raceW"
+
+for (i in seq(1,length(expo),1)){
+  filenames <- c( tempfile())
+  for( f in  filenames ){
+    cat(config.em, file=f)
+    x <- readLines(f)
+    y <- gsub("dataset", dataname, x)
+    z <- gsub("exposure", expo[i], y)
+    s <- gsub("subg", subg, z)
+    for (j in seq(1,length(cuz),1)){
+      w <- gsub("outcome", cuz[j], s)
+      cat(w, file=f, sep="\n")
+      k=j+length(cuz)*(i-1)
+      writeLines(w, here('config-files','raceWnonurb', paste(k,'.txt', sep = "")))
+    }
+  }
+  file.remove(f)
+  }
+```
