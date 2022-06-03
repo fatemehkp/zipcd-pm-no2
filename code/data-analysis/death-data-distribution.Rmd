@@ -154,11 +154,29 @@ colnames(x8) <-  sub("_rc*", "", colnames(x8))
 x9 <- dt.dead.enrollee %>% 
   group_by(region) %>% 
   summarise(across(allcuz:kidn, sum)) %>% 
-  mutate(Subgroup = "Region", 
+  mutate(Subgroup = "Race urban", 
          Value = ifelse(region == 1, "W",
                         ifelse(region == 2, "MW", 
                                ifelse(region == 3, "S", "NE")))) %>% 
   select(Subgroup, Value, everything(), -region)
+
+## Race Urban
+x10 <- dt.dead.enrollee %>% 
+  filter(urban == 1) %>% 
+  group_by(race) %>% 
+  summarise(across(allcuz:kidn, sum)) %>% 
+  mutate(Subgroup = "Race Urban", 
+         Value = race) %>% 
+  select(Subgroup, Value, everything(), -race)
+
+## Race Non-urban
+x11 <- dt.dead.enrollee %>% 
+  filter(urban == 0) %>% 
+  group_by(race) %>% 
+  summarise(across(allcuz:kidn, sum)) %>% 
+  mutate(Subgroup = "Race Non-urban", 
+         Value = race) %>% 
+  select(Subgroup, Value, everything(), -race)
 
 ## Combine
 x <- x1 %>% 
@@ -173,6 +191,8 @@ x <- x1 %>%
   add_row(x71) %>% 
   add_row(x8) %>% 
   add_row(x9) %>% 
+  add_row(x10) %>% 
+  add_row(x11) %>% 
   mutate(Index = "PM25") %>% 
   select(Index, everything())
 ```
@@ -288,6 +308,24 @@ y9 <- dt.dead.enrollee %>%
                                ifelse(region == 3, "S", "NE")))) %>% 
   select(Subgroup, Value, everything(), -region)
 
+## Race Urban
+y10 <- dt.dead.enrollee %>% 
+  filter(!is.na(no2_1yr) & urban == 1) %>% 
+  group_by(race) %>% 
+  summarise(across(allcuz:kidn, sum)) %>% 
+  mutate(Subgroup = "Race Urban", 
+         Value = race) %>% 
+  select(Subgroup, Value, everything(), -race)
+
+## Race Non-urban
+y11 <- dt.dead.enrollee %>% 
+  filter(!is.na(no2_1yr) & urban == 0) %>% 
+  group_by(race) %>% 
+  summarise(across(allcuz:kidn, sum)) %>% 
+  mutate(Subgroup = "Race Non-urban", 
+         Value = race) %>% 
+  select(Subgroup, Value, everything(), -race)
+
 ## Combine
 y <- y1 %>% 
   add_row(y11) %>% 
@@ -301,6 +339,8 @@ y <- y1 %>%
   add_row(y71) %>% 
   add_row(y8) %>% 
   add_row(y9) %>% 
+  add_row(y10) %>% 
+  add_row(y11) %>% 
   mutate(Index = "NO2") %>% 
   select(Index, everything())
 
