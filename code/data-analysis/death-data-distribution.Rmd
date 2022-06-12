@@ -61,6 +61,7 @@ dt.dead.enrollee <- dt.state.region %>%
             region = Region.IV) %>% 
   right_join(dt.dead.enrollee)
 ```
+
 # PM2.5
 ```{r - PM2.5}
 ## Total Base
@@ -71,14 +72,14 @@ x1 <- dt.dead.enrollee %>%
   select(Subgroup, Value, everything())
 
 ## Total SES
-x11 <- dt.dead.enrollee %>% 
+x1a <- dt.dead.enrollee %>% 
   summarise(across(allcuz:kidn, sum)) %>% 
   mutate(Subgroup = "Total", 
          Value = "SES") %>% 
   select(Subgroup, Value, everything())
 
 ## Total Residual
-x12 <- dt.dead.enrollee %>% 
+x1b <- dt.dead.enrollee %>% 
   summarise(across(allcuz:kidn, sum)) %>% 
   mutate(Subgroup = "Total", 
          Value = "Residual") %>% 
@@ -134,7 +135,7 @@ x7 <- dt.dead.enrollee %>%
   select(Subgroup, Value, everything())
 
 ## BRFSS Adj
-x71 <- dt.dead.enrollee %>% 
+x7a <- dt.dead.enrollee %>% 
   filter(!is.na(X_bmi_Mean)) %>% 
   summarise(across(allcuz:kidn, sum)) %>% 
   mutate(Subgroup = "BRFSS", 
@@ -154,7 +155,7 @@ colnames(x8) <-  sub("_rc*", "", colnames(x8))
 x9 <- dt.dead.enrollee %>% 
   group_by(region) %>% 
   summarise(across(allcuz:kidn, sum)) %>% 
-  mutate(Subgroup = "Race urban", 
+  mutate(Subgroup = "Region", 
          Value = ifelse(region == 1, "W",
                         ifelse(region == 2, "MW", 
                                ifelse(region == 3, "S", "NE")))) %>% 
@@ -180,15 +181,15 @@ x11 <- dt.dead.enrollee %>%
 
 ## Combine
 x <- x1 %>% 
-  add_row(x11) %>% 
-  add_row(x12) %>% 
+  add_row(x1a) %>% 
+  add_row(x1b) %>% 
   add_row(x2) %>% 
   add_row(x3) %>% 
   add_row(x4) %>% 
   add_row(x5) %>% 
   add_row(x6) %>% 
   add_row(x7) %>% 
-  add_row(x71) %>% 
+  add_row(x7a) %>% 
   add_row(x8) %>% 
   add_row(x9) %>% 
   add_row(x10) %>% 
@@ -208,7 +209,7 @@ y1 <- dt.dead.enrollee %>%
   select(Subgroup, Value, everything())
 
 ## Total SES
-y11 <- dt.dead.enrollee %>% 
+y1a <- dt.dead.enrollee %>% 
   filter(!is.na(no2_1yr)) %>% 
   summarise(across(allcuz:kidn, sum)) %>% 
   mutate(Subgroup = "Total", 
@@ -216,7 +217,7 @@ y11 <- dt.dead.enrollee %>%
   select(Subgroup, Value, everything())
 
 ## Total Residual
-y12 <- dt.dead.enrollee %>% 
+y1b <- dt.dead.enrollee %>% 
   filter(!is.na(no2_1yr)) %>% 
   summarise(across(allcuz:kidn, sum)) %>% 
   mutate(Subgroup = "Total", 
@@ -279,7 +280,7 @@ y7 <- dt.dead.enrollee %>%
   select(Subgroup, Value, everything())
 
 ## BRFSS Adj
-y71 <- dt.dead.enrollee %>% 
+y7a <- dt.dead.enrollee %>% 
   filter(!is.na(no2_1yr)) %>% 
   filter(!is.na(X_bmi_Mean)) %>% 
   summarise(across(allcuz:kidn, sum)) %>% 
@@ -328,22 +329,21 @@ y11 <- dt.dead.enrollee %>%
 
 ## Combine
 y <- y1 %>% 
-  add_row(y11) %>% 
-  add_row(y12) %>% 
+  add_row(y1a) %>% 
+  add_row(y1b) %>% 
   add_row(y2) %>% 
   add_row(y3) %>% 
   add_row(y4) %>% 
   add_row(y5) %>% 
   add_row(y6) %>% 
   add_row(y7) %>% 
-  add_row(y71) %>% 
+  add_row(y7a) %>% 
   add_row(y8) %>% 
   add_row(y9) %>% 
   add_row(y10) %>% 
   add_row(y11) %>% 
   mutate(Index = "NO2") %>% 
   select(Index, everything())
-
 ```
 
 # PM2.5 and NO2

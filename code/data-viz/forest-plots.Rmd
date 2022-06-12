@@ -1,7 +1,7 @@
 ---
 title: "Forest Plots"
 author: "Fatemeh Kazemi"
-date: "4/25/2021"
+date: "6/12/2022"
 output: html_document
 ---
 
@@ -135,7 +135,7 @@ dev.off()
 
 ```{r - type1Diabetes - PM2.5}
 ## Labels defining subgroups are a little indented!
-subgps <- c(2,3,6,7,10,11,14,15,16,17,20,21,24,25,26,29,30)
+subgps <- c(2,3,6,7,10,11,14,15,16,17,20,21,24,25,26,27,30,31,32,35,36)
 type1Diab.pm25$Variable[subgps] <- paste("  ",type1Diab.pm25$Variable[subgps]) 
 
 ## Combine the count and percent column
@@ -156,7 +156,7 @@ tabletext.pm <- cbind(c("Subgroup","\n", type1Diab.pm25$Variable),
                    c("T1DM Death # (%)","\n", yp),
                    c("Hazard Ratio (95% CI)","\n", hr))
 
-jpeg(here('output','plot','type1Diab-pm25.jpeg'), width = 12, height = 12, 
+jpeg(here('output','plot','type1Diab-pm25-revised.jpeg'), width = 12, height = 14, 
      units = 'in', res = 600)
 forestplot(labeltext = tabletext.pm, 
            mean = c(NA, NA, type1Diab.pm25$`Point Estimate`), 
@@ -164,7 +164,7 @@ forestplot(labeltext = tabletext.pm,
            upper = c(NA, NA, type1Diab.pm25$High),
            align = c("l", "l", "l", "l"),
            is.summary = c(T, F, T, F, F, F, T, F, F, F, T, F, F, F, T, F, F, F, F, F, 
-                          T, F, F, F, T, F, F, F, F, T, F, F, F),
+                          T, F, F, F, T, F, F, F, F, F, T, F, F, F, F, T, F, F, F),
            graph.pos = 4,
            hrzl_lines = gpar(col = "#444444"),
            zero = 1, 

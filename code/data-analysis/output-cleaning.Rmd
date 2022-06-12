@@ -186,6 +186,45 @@ out.urbanicity <- out.urbanicity %>%
   select(Index, Cause, Subgroup, Value, HR, HR.L, HR.U) 
 ```
 
+```{r Output Race urban area}
+out.race.urb = data.frame()
+for (i in c("A", "B", "H", "N", "W", "O")){
+  dt <- read.csv(here('output','analysis','csv',paste('race',i, 'urb','.csv', sep= ""))) %>% 
+    mutate(Value = i)
+  out.race.urb  <-  rbind(out.race.urb, dt)
+}
+
+out.race.urb <- out.race.urb %>% 
+  merge(Para.to.Index) %>% 
+  merge(Outcome.to.Cause) %>% 
+  mutate(HR = round(exp(Coef * 10),3),
+         HR.L = round(exp((Coef-1.96*std) * 10),3),
+         HR.U = round(exp((Coef+1.96*std) * 10),3),
+         Subgroup = "Race Urban") %>% 
+  arrange(Config, Value) %>% 
+  select(Index, Cause, Subgroup, Value, HR, HR.L, HR.U) 
+```
+
+# Not in final dataset
+```{r Output Race non-urban area}
+out.race.nonurb = data.frame()
+for (i in c("A", "B", "H", "N", "W")){
+  dt <- read.csv(here('output','analysis','csv',paste('race',i, 'nonurb','.csv', sep= ""))) %>% 
+    mutate(Value = i)
+  out.race.nonurb  <-  rbind(out.race.nonurb, dt)
+}
+
+out.race.nonurb <- out.race.nonurb %>% 
+  merge(Para.to.Index) %>% 
+  merge(Outcome.to.Cause) %>% 
+  mutate(HR = round(exp(Coef * 10),3),
+         HR.L = round(exp((Coef-1.96*std) * 10),3),
+         HR.U = round(exp((Coef+1.96*std) * 10),3),
+         Subgroup = "Race Non-urban") %>% 
+  arrange(Config, Value) %>% 
+  select(Index, Cause, Subgroup, Value, HR, HR.L, HR.U) 
+```
+
 ```{r Output SES urban area}
 out.urbanses = data.frame()
 for (i in c("L", "M", "H")){
@@ -258,8 +297,9 @@ out.results <- out.base %>%
   add_row(out.resid) %>% 
   add_row(out.age) %>% 
   add_row(out.sex) %>% 
-  add_row(out.race) %>% 
+  add_row(out.race) %>%
   add_row(out.urbanicity) %>% 
+  add_row(out.race.urb) %>%
   add_row(out.urbanses) %>% 
   add_row(out.brfss) %>% 
   add_row(out.rc4) %>% 
@@ -276,6 +316,7 @@ write.csv(out.results,
 ```
 
 ```{r}
+# done
 sepsis <- out.results %>% 
   filter(Cause == "Sepsis" & !is.na(Enrollee))
 
