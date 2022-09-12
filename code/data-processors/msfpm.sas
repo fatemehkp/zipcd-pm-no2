@@ -1,12 +1,10 @@
-/* Created by Fatemeh K (01-02-2021)																*/
+/* Created by Fatemeh K (01-02-2021) (09-08-2022)																*/
 /* Create an aggregate data by the zipcode															*/
 /* Dataset aggregated number of enrolleess and deaths by zipcode, year, month, age, sex and race    */
 /* Focus on 2000 (Jan) to 2008 data                                              					*/
 /* Include SES data from IRS                                                                        */
 
 libname cms '/scratch/fatemehkp/projects/CMS/data/processed';
-libname prcs '/scratch/fatemehkp/projects/Zipcode PM NO2/data/processed';
-libname ses '/scratch/fatemehkp/projects/USA Spatial/data/processed';
 
 data enrollee_pm; 
 	set cms.enrollee65_ndi_0008_clean;
@@ -22,9 +20,9 @@ run;
 proc sql;
 *Count the number of enrollees of age a, sex s and race r by zipcode z at the beginning of the month t ;
 	create table master_enrollee_byzip as
-	select zip_code, year, month, enrollee_age, sex, race, count(distinct BENE_ID) as no_enrollee
+	select zip_code, year, month, enrollee_age, sex, race, pm_1yr, state, ses_zip, ses_stt, count(distinct BENE_ID) as no_enrollee
 	from enrollee_pm
-	group by zip_code, year, month, enrollee_age, sex, race;
+	group by zip_code, year, month, enrollee_age, sex, race, pm_1yr, state, ses_zip, ses_stt;
 
 *Count the number of all-cause death among enrollees of age a, sex s and race r by zipcode c during month t ;
 /* ICD CODE */
@@ -114,9 +112,17 @@ proc sql;
 	where uri=1
 	group by zip_code, year, month, enrollee_age, sex, race;
 
-*Count the number of ARDS death among enrollees of age a, sex s and race r by zipcode c during month t ;
+*Count the number of LRI death among enrollees of age a, sex s and race r by zipcode c during month t ;
 /* ICD CODE */
 	create table master_death_byzip12 as
+	select zip_code, year, month, enrollee_age, sex, race, count(distinct BENE_ID) as no_death_lri
+	from enrollee_pm
+	where lri=1
+	group by zip_code, year, month, enrollee_age, sex, race;
+	
+*Count the number of ARDS death among enrollees of age a, sex s and race r by zipcode c during month t ;
+/* ICD CODE */
+	create table master_death_byzip13 as
 	select zip_code, year, month, enrollee_age, sex, race, count(distinct BENE_ID) as no_death_ards
 	from enrollee_pm
 	where ards=1
@@ -124,7 +130,7 @@ proc sql;
 
 *Count the number of Cancer death among enrollees of age a, sex s and race r by zipcode c during month t ;
 /* ICD CODE */
-	create table master_death_byzip13 as
+	create table master_death_byzip14 as
 	select zip_code, year, month, enrollee_age, sex, race, count(distinct BENE_ID) as no_death_canc
 	from enrollee_pm
 	where canc=1
@@ -132,7 +138,7 @@ proc sql;
 
 *Count the number of Lung Cancer death among enrollees of age a, sex s and race r by zipcode c during month t ;
 /* ICD CODE */
-	create table master_death_byzip14 as
+	create table master_death_byzip15 as
 	select zip_code, year, month, enrollee_age, sex, race, count(distinct BENE_ID) as no_death_lungc
 	from enrollee_pm
 	where lungc=1
@@ -140,7 +146,7 @@ proc sql;
 	
 *Count the number of Sepsis death among enrollees of age a, sex s and race r by zipcode c during month t ;
 /* ICD CODE */
-	create table master_death_byzip15 as
+	create table master_death_byzip16 as
 	select zip_code, year, month, enrollee_age, sex, race, count(distinct BENE_ID) as no_death_seps
 	from enrollee_pm
 	where seps=1
@@ -148,15 +154,39 @@ proc sql;
 
 *Count the number of Vascular Dementia death among enrollees of age a, sex s and race r by zipcode c during month t ;
 /* ICD CODE */
-	create table master_death_byzip16 as
+	create table master_death_byzip17 as
 	select zip_code, year, month, enrollee_age, sex, race, count(distinct BENE_ID) as no_death_VaD
 	from enrollee_pm
 	where VaD=1
 	group by zip_code, year, month, enrollee_age, sex, race;
 
+*Count the number of Unspecified Dementia death among enrollees of age a, sex s and race r by zipcode c during month t ;
+/* ICD CODE */
+	create table master_death_byzip18 as
+	select zip_code, year, month, enrollee_age, sex, race, count(distinct BENE_ID) as no_death_UsD
+	from enrollee_pm
+	where UsD=1
+	group by zip_code, year, month, enrollee_age, sex, race;
+
+*Count the number of Dementia death among enrollees of age a, sex s and race r by zipcode c during month t ;
+/* ICD CODE */
+	create table master_death_byzip19 as
+	select zip_code, year, month, enrollee_age, sex, race, count(distinct BENE_ID) as no_death_demn
+	from enrollee_pm
+	where demn=1
+	group by zip_code, year, month, enrollee_age, sex, race;
+
+*Count the number of Parkinson death among enrollees of age a, sex s and race r by zipcode c during month t ;
+/* ICD CODE */
+	create table master_death_byzip20 as
+	select zip_code, year, month, enrollee_age, sex, race, count(distinct BENE_ID) as no_death_PD
+	from enrollee_pm
+	where PD=1
+	group by zip_code, year, month, enrollee_age, sex, race;
+	
 *Count the number of Alzheimer death among enrollees of age a, sex s and race r by zipcode c during month t ;
 /* ICD CODE */
-	create table master_death_byzip17 as
+	create table master_death_byzip21 as
 	select zip_code, year, month, enrollee_age, sex, race, count(distinct BENE_ID) as no_death_AD
 	from enrollee_pm
 	where AD=1
@@ -164,23 +194,23 @@ proc sql;
 	
 *Count the number of Neurodegenerative Disease death among enrollees of age a, sex s and race r by zipcode c during month t ;
 /* ICD CODE */
-	create table master_death_byzip18 as
+	create table master_death_byzip22 as
 	select zip_code, year, month, enrollee_age, sex, race, count(distinct BENE_ID) as no_death_NeD
 	from enrollee_pm
 	where NeD=1
 	group by zip_code, year, month, enrollee_age, sex, race;
-
-*Count the number of Unspecified Dementia death among enrollees of age a, sex s and race r by zipcode c during month t ;
+	
+*Count the number of Multiple Sclerosis death among enrollees of age a, sex s and race r by zipcode c during month t ;
 /* ICD CODE */
-	create table master_death_byzip19 as
-	select zip_code, year, month, enrollee_age, sex, race, count(distinct BENE_ID) as no_death_UsD
+	create table master_death_byzip23 as
+	select zip_code, year, month, enrollee_age, sex, race, count(distinct BENE_ID) as no_death_MS
 	from enrollee_pm
-	where UsD=1
+	where MS=1
 	group by zip_code, year, month, enrollee_age, sex, race;
 	
 *Count the number of Diabete typeI death among enrollees of age a, sex s and race r by zipcode c during month t ;
 /* ICD CODE */
-	create table master_death_byzip20 as
+	create table master_death_byzip24 as
 	select zip_code, year, month, enrollee_age, sex, race, count(distinct BENE_ID) as no_death_diabt1
 	from enrollee_pm
 	where diabt1=1
@@ -188,7 +218,7 @@ proc sql;
 
 *Count the number of Diabete typeII death among enrollees of age a, sex s and race r by zipcode c during month t ;
 /* ICD CODE */
-	create table master_death_byzip21 as
+	create table master_death_byzip25 as
 	select zip_code, year, month, enrollee_age, sex, race, count(distinct BENE_ID) as no_death_diabt2
 	from enrollee_pm
 	where diabt2=1
@@ -196,7 +226,7 @@ proc sql;
 
 *Count the number of Diabete death among enrollees of age a, sex s and race r by zipcode c during month t ;
 /* ICD CODE */
-	create table master_death_byzip22 as
+	create table master_death_byzip26 as
 	select zip_code, year, month, enrollee_age, sex, race, count(distinct BENE_ID) as no_death_diab
 	from enrollee_pm
 	where diabt1=1 or diabt2=1
@@ -204,7 +234,7 @@ proc sql;
 
 *Count the number of Renal disease death among enrollees of age a, sex s and race r by zipcode c during month t ;
 /* ICD CODE */
-	create table master_death_byzip23 as
+	create table master_death_byzip27 as
 	select zip_code, year, month, enrollee_age, sex, race, count(distinct BENE_ID) as no_death_kidn
 	from enrollee_pm
 	where kidn=1
@@ -220,7 +250,8 @@ data master_cuz;
 								master_death_byzip13 master_death_byzip14 master_death_byzip15
 								master_death_byzip16 master_death_byzip17 master_death_byzip18
 								master_death_byzip19 master_death_byzip20 master_death_byzip21
-								master_death_byzip22 master_death_byzip23;
+								master_death_byzip22 master_death_byzip23 master_death_byzip24
+								master_death_byzip25 master_death_byzip26 master_death_byzip27;
 	by zip_code year month enrollee_age sex race;
 run;
 
@@ -232,7 +263,8 @@ proc datasets nolist;
 								master_death_byzip13 master_death_byzip14 master_death_byzip15
 								master_death_byzip16 master_death_byzip17 master_death_byzip18
 								master_death_byzip19 master_death_byzip20 master_death_byzip21
-								master_death_byzip22 master_death_byzip23;
+								master_death_byzip22 master_death_byzip23 master_death_byzip24
+								master_death_byzip25 master_death_byzip26 master_death_byzip27;
 run;
 
 /*change . to 0*/
@@ -243,34 +275,16 @@ data master_cuz; set master_cuz;
 		end;
 run;
 
-proc sql;
-	create table master_cuz_pm as
-	select *
-	from master_cuz a
-	inner join prcs.pm_zipcd b
-	on a.zip_code=b.zip_code and a.year=b.year and a.month=b.month;
-quit;
-
-
-proc sql;
-	create table master_cuz_ses as
-	select *
-	from master_cuz_pm a
-	inner join ses.ses_zipcd b
-	on a.zip_code=b.zip_code and a.year=b.year ;
-quit;
-
-data master_cuz_ses; 
+data master_cuz; 
 	length StrID $6.; 
-	set master_cuz_ses;
+	set master_cuz;
 	agec = STRIP(PUT(enrollee_age, z2.));
 	StrID = agec || sex || race;
-	drop agec enrollee_age sex race year month state
-	     pm_1mo pm_6mo pm_2yr pm_3yr pm_4yr pm_5yr;
+	drop agec enrollee_age sex race year month;
 run;
 
 proc export 
-	data=master_cuz_ses
+	data=master_cuz
 	outfile='/scratch/fatemehkp/projects/Zipcode PM NO2/data/analysis/ndi-pm-zipcd.csv'  
 	dbms=csv replace;
 run;

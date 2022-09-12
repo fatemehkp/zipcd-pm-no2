@@ -1,4 +1,4 @@
-/* Created by Fatemeh K (01-15-2021)																*/
+/* Created by Fatemeh K (01-15-2021) (09-08-2022)																*/
 /* Focus on 2000 (Jan) to 2008 data                                              					*/
 /* Count total numbers and subgroups */
                                                                 
@@ -25,7 +25,7 @@ quit;
 
 
 /*****************************/
-/* Total enrollee at each age group at time of enrollment */
+/* Total enrollee at each age at time of enrollment */
 proc sql;
 	title 'Enrollee Distribution of Age at time of enrollement';
 	Create table enrollee_age as
@@ -37,6 +37,23 @@ quit;
 
 proc export	data=enrollee_age
 	outfile='/scratch/fatemehkp/projects/Zipcode PM NO2/output/table/enrollee_age_pm.csv'
+	dbms=csv
+	replace;
+run;
+
+
+/*****************************/
+/* Total enrollee at each age group at time of enrollment */
+proc sql;
+	title 'Enrollee Distribution of Age Group at time of enrollement';
+	Create table enrollee_agecat as
+	select sum(case when enrollee_age <= 75 then 1 else 0 end) as LE75_freq,
+		   sum(case when enrollee_age > 75 then 1 else 0 end) as M75_freq
+	from prcs.enrollee_pm_start
+quit;
+
+proc export	data=enrollee_agecat
+	outfile='/scratch/fatemehkp/projects/Zipcode PM NO2/output/table/enrollee_agecat_pm.csv'
 	dbms=csv
 	replace;
 run;
@@ -79,30 +96,12 @@ run;
 
 
 /*****************************/
-/* Total enrollee in the US with BRFSS data */
-proc sql;
-	title 'Total enrollee in the US with BRFSS data';
-	select count(bene_id) as num_enrollee
-	from prcs.enrollee_pm_brfss_start;
-quit;
-
-/*****************************/
-/* Total zipcode in the US with BRFSS data */
-proc sql;
-	title 'Total zipcode in the US with BRFSS data';
-	select count(distinct zip_code) as num_zipcode
-	from cms.enrollee65_ndi_0008_clean
-	where sex ne 'U' and pm_1yr ne . and ses_zip ne . and X_bmi_mean ne .;
-quit;
-
-
-/*****************************/
 /* Total enrollee in the US with Urbanicty Data */
 proc sql;
 	title 'Total enrollee in the US with Urbanicty Data';
 	select count(bene_id) as num_enrollee
 	from prcs.enrollee_pm_start
-	where urban ne .;
+	where ruca ne '';
 quit;
 
 /*****************************/
@@ -111,24 +110,23 @@ proc sql;
 	title 'Total zipcode in the US with Urbanicty Data';
 	select count(distinct zip_code) as num_zipcode
 	from cms.enrollee65_ndi_0008_clean
-	where sex ne 'U' and pm_1yr ne . and ses_zip ne . and urban ne .;
+	where sex ne 'U' and pm_1yr ne . and ses_zip ne . and ruca ne '';
 quit;
-
 
 /*****************************/
 /* Total enrollee at each urbanicity group at time of enrollment */
 proc sql;
 	title 'Enrollee Distribution of Urbanicity at time of enrollement';
-	Create table enrollee_urban as
-	select urban, count(bene_id) as urb_freq
+	Create table enrollee_ruca as
+	select ruca, count(bene_id) as ruca_freq
 	from prcs.enrollee_pm_start
-	where urban ne .
-	group by urban
-	order by urban;
+	where ruca ne ''
+	group by ruca
+	order by ruca;
 quit;
 
-proc export	data=enrollee_urban
-	outfile='/scratch/fatemehkp/projects/Zipcode PM NO2/output/table/enrollee_urban_pm.csv'
+proc export	data=enrollee_ruca
+	outfile='/scratch/fatemehkp/projects/Zipcode PM NO2/output/table/enrollee_ruca_pm.csv'
 	dbms=csv
 	replace;
 run;
@@ -154,7 +152,7 @@ quit;
 
 
 /*****************************/
-/* Total enrollee at each ses group at time of enrollment */
+/* Total enrollee at each ses group in urban areas at time of enrollment */
 proc sql;
 	title 'Enrollee Distribution of ses group at time of enrollement';
 	Create table enrollee_ses as
@@ -170,3 +168,56 @@ proc export	data=enrollee_ses
 	dbms=csv
 	replace;
 run;
+
+/*****************************/
+/* Total enrollee at each race group in urban areas at time of enrollment */
+proc sql;
+	title 'Enrollee Distribution of ses group at time of enrollement';
+	Create table enrollee_race as
+	select race, count(bene_id) as race_freq
+	from prcs.enrollee_pm_start
+	where ruca = "Urban"
+	group by race
+	order by race;
+quit;
+
+proc export	data=enrollee_race
+	outfile='/scratch/fatemehkp/projects/Zipcode PM NO2/output/table/enrollee_urban_race_pm.csv'
+	dbms=csv
+	replace;
+run;
+
+/*****************************/
+/* Total enrollee at each region group at time of enrollment */
+proc sql;
+	title 'Enrollee Distribution of Region at time of enrollement';
+	Create table enrollee_region as
+	select region, count(bene_id) as region_freq
+	from prcs.enrollee_pm_start
+	group by region
+	order by region;
+quit;
+
+proc export	data=enrollee_region
+	outfile='/scratch/fatemehkp/projects/Zipcode PM NO2/output/table/enrollee_region_pm.csv'
+	dbms=csv
+	replace;
+run;
+
+
+/*****************************/
+/* Total enrollee in the US with BRFSS data */
+proc sql;
+	title 'Total enrollee in the US with BRFSS data';
+	select count(bene_id) as num_enrollee
+	from prcs.enrollee_pm_brfss_start;
+quit;
+
+/*****************************/
+/* Total zipcode in the US with BRFSS data */
+proc sql;
+	title 'Total zipcode in the US with BRFSS data';
+	select count(distinct zip_code) as num_zipcode
+	from cms.enrollee65_ndi_0008_clean
+	where sex ne 'U' and pm_1yr ne . and ses_zip ne . and X_bmi_mean ne .;
+quit;

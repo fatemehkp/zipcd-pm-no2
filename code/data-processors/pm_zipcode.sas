@@ -147,7 +147,7 @@ data test;
 	keep zip_code pm_daily_avg pm_1yr_avg diff;
 run;
 
-proc univariate data = test;
+proc univariate data=test;
 run;
 	
 

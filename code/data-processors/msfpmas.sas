@@ -1,28 +1,30 @@
-/* Created by Fatemeh K (08-28-2022) (08-19-2022)																*/
+/* Created by Fatemeh K (01-02-2021)(09-08-2022)																*/
 /* Create an aggregate data by the zipcode															*/
 /* Dataset aggregated number of enrolleess and deaths by zipcode, year, month, age, sex and race    */
-/* Focus on 2000 (Jan) to 2008 data                                              					*/
+/* Focus on 2000 (Jan) to 2008 data                                                                 */
 /* Include SES data from IRS                                                                        */
-/* Interaction term for race	  		   													        */
+/* Interaction term for age and sex                                                                 */
 
 libname cms '/scratch/fatemehkp/projects/CMS/data/processed';
 
 data enrollee_pm; 
 	set cms.enrollee65_ndi_0008_clean;
+	if race='W' then race='W';
+		else race='NW';
 	if enrollee_age ge 90 then enrollee_age = 90;
 	where sex ne 'U' and pm_1yr ne . and ses_zip ne .;
 run;
 
-	
+
 /****************************************************************************/
 /* Compute MASTER file                                                      */
 /****************************************************************************/
 proc sql;
 *Count the number of enrollees of age a, sex s and race r by zipcode z at the beginning of the month t ;
 	create table master_enrollee_byzip as
-	select zip_code, year, month, enrollee_age, sex, race, pm_1yr, state, ses_zip, ses_stt, count(distinct BENE_ID) as no_enrollee
+	select zip_code, year, month, enrollee_age, sex, race, pm_1yr, no2_1yr, state, ses_zip, ses_stt, count(distinct BENE_ID) as no_enrollee
 	from enrollee_pm
-	group by zip_code, year, month, enrollee_age, sex, race, pm_1yr, state, ses_zip, ses_stt;
+	group by zip_code, year, month, enrollee_age, sex, race, pm_1yr, no2_1yr, state, ses_zip, ses_stt;
 
 *Count the number of all-cause death among enrollees of age a, sex s and race r by zipcode c during month t ;
 /* ICD CODE */
@@ -262,18 +264,18 @@ run;
 
 data master_cuz; 
 	set master_cuz;
-	if race="A" then raceA=0; else raceA=1;
-	if race="B" then raceB=0; else raceB=1;
-	if race="H" then raceH=0; else raceH=1;
-	if race="N" then raceN=0; else raceN=1;
-	if race="W" then raceW=0; else raceW=1;
-/*	if race="O" then raceO=0; else raceO=1;*/
-	pmraceA=pm_1yr*raceA;
-	pmraceB=pm_1yr*raceB;
-	pmraceH=pm_1yr*raceH;
-	pmraceN=pm_1yr*raceN;
-	pmraceW=pm_1yr*raceW;
-/*	pmraceO=pm_1yr*raceO;*/
+	if enrollee_age <=75 then agel=0; else agel=1;
+	if enrollee_age >75 then agem=0; else agem=1;
+	if sex="F" then sexF=0; else sexF=1;
+	if sex="M" then sexM=0; else sexM=1;
+/*	if race="W" then raceW=0; else raceW=1;*/
+/*	if race="N" then raceNW=0; else raceNW=1;*/
+	pmagel=pm_1yr*agel;
+	pmagem=pm_1yr*agem;
+	pmsexF=pm_1yr*sexF;
+	pmsexM=pm_1yr*sexM;
+/*	o3raceW=pm_1yr*raceW;*/
+/*	o3raceNW=pm_1yr*raceNW;*/
 run;
 
 data master_cuz; 
@@ -286,7 +288,7 @@ run;
 
 proc export 
 	data=master_cuz
-	outfile='/scratch/fatemehkp/projects/Zipcode PM NO2/data/analysis/ndi-pm-zipcd-race.csv'  
+	outfile='/scratch/fatemehkp/projects/Zipcode PM NO2/data/analysis/ndi-pm-zipcd-as.csv'  
 	dbms=csv replace;
 run;
 

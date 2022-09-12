@@ -15,7 +15,7 @@ library(here)
 ```
 
 ```{r}
-dirUSSpatial <- 'C:\\Users\\fkazem01\\Box\\Projects\\USA Spatial\\data\\processed\\'
+dirUSSpatial <- 'C:\\Users\\fkazem01\\Desktop\\Projects\\USA Spatial\\data\\processed\\'
 load(paste0(dirUSSpatial,'state-region.RDa'))
 load(here('data','processed','dead-enrollee.RDa'))
 ```
